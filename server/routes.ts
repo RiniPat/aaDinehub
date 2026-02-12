@@ -182,6 +182,10 @@ export async function registerRoutes(
       
       const prompt = `Generate a menu for a ${cuisine} restaurant with about 15 items spread across categories (Appetizer, Main, Dessert, Drink). 
       The tone should be ${tone || "standard"}. 
+      All prices must be in AED (United Arab Emirates Dirham).
+      For each item, include an "imageUrl" field with a relevant food image URL using this format:
+      https://source.unsplash.com/400x300/?FOOD_NAME_HERE (replace spaces with hyphens, use specific food terms).
+      
       Return a JSON object with the following structure:
       {
         "name": "Menu Name",
@@ -190,21 +194,23 @@ export async function registerRoutes(
           {
             "name": "Item Name",
             "description": "Brief 1-line description",
-            "price": "10.00",
+            "price": "45.00",
             "category": "Appetizer" | "Main" | "Dessert" | "Drink",
+            "imageUrl": "https://source.unsplash.com/400x300/?spaghetti-carbonara",
             "isBestseller": true/false,
             "isChefsPick": true/false,
             "isTodaysSpecial": true/false
           }
         ]
       }
-      Rules: Mark 2-3 items as bestseller, 2 as chef's pick, 1-2 as today's special. Generate around 15 items total. Keep descriptions short (one line). 
+      Rules: Mark 2-3 items as bestseller, 2 as chef's pick, 1-2 as today's special. Generate around 15 items total. Keep descriptions short (one line). Prices should be realistic in AED (e.g. appetizers 25-55 AED, mains 45-120 AED, desserts 25-50 AED, drinks 15-40 AED).
+      Make imageUrl specific to each dish - use the dish name in the URL with hyphens.
       Do not include any markdown formatting.`;
 
       const response = await getOpenAI().chat.completions.create({
-        model: "gpt-5.1",
+        model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "You are a helpful assistant that generates restaurant menus in JSON format." },
+          { role: "system", content: "You are a helpful assistant that generates restaurant menus in JSON format. Always use AED currency for prices." },
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },
@@ -264,17 +270,19 @@ export async function registerRoutes(
       menuId: menu.id,
       name: "Spaghetti Carbonara",
       description: "Classic Roman pasta with egg, hard cheese, cured pork, and black pepper.",
-      price: "18.00",
+      price: "65.00",
       category: "Main",
       isAvailable: true,
+      imageUrl: "https://source.unsplash.com/400x300/?spaghetti-carbonara",
     });
     await storage.createMenuItem({
       menuId: menu.id,
       name: "Tiramisu",
       description: "Coffee-flavoured Italian dessert.",
-      price: "8.00",
+      price: "35.00",
       category: "Dessert",
       isAvailable: true,
+      imageUrl: "https://source.unsplash.com/400x300/?tiramisu-dessert",
     });
   }
 
