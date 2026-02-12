@@ -171,6 +171,31 @@ export function useCreateMenuItem() {
   });
 }
 
+export function useUpdateMenuItem() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, menuId, ...data }: { id: number; menuId: number } & Record<string, any>) => {
+      const url = buildUrl(api.menuItems.update.path, { id });
+      const res = await fetch(url, {
+        method: api.menuItems.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update item");
+      return api.menuItems.update.responses[200].parse(await res.json());
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [api.menus.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.menus.get.path, variables.menuId] });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+}
+
 export function useDeleteMenuItem() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
